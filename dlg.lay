@@ -1,0 +1,11 @@
+LAYOUT(CustomizeDlgLayout, 160, 112)
+	ITEM(Upp::Label, dv___0, SetLabel(t_("Width")).LeftPosZ(8, 40).TopPosZ(8, 19))
+	ITEM(Upp::EditInt, inputWidth, LeftPosZ(88, 64).TopPosZ(8, 19))
+	ITEM(Upp::Label, dv___2, SetLabel(t_("Height")).LeftPosZ(8, 40).TopPosZ(32, 19))
+	ITEM(Upp::EditInt, inputHeight, LeftPosZ(88, 64).TopPosZ(32, 19))
+	ITEM(Upp::Label, dv___4, SetLabel(t_("Bombs")).LeftPosZ(8, 40).TopPosZ(56, 19))
+	ITEM(Upp::EditInt, inputBombs, LeftPosZ(88, 64).TopPosZ(56, 19))
+	ITEM(Upp::Button, okBtn, SetLabel(t_("OK")).LeftPosZ(8, 64).TopPosZ(84, 20))
+	ITEM(Upp::Button, cancelBtn, SetLabel(t_("Cancel")).LeftPosZ(88, 64).TopPosZ(84, 20))
+END_LAYOUT
+

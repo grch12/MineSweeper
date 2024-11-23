@@ -1,0 +1,16 @@
+uses
+	CtrlLib;
+
+file
+	.clang-format,
+	board.h,
+	dlg.lay,
+	customize.h,
+	global.h,
+	board.cpp,
+	customize.cpp,
+	main.cpp;
+
+mainconfig
+	"" = "GUI";
+
