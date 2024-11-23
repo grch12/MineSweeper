@@ -6,7 +6,7 @@
 #define LAYOUTFILE <MineSweeper/dlg.lay>
 #include <CtrlCore/lay.h>
 
-class CustomizeDlg: public WithCustomizeDlgLayout<Upp::TopWindow> {
+class CustomizeDlg : public WithCustomizeDlgLayout<Upp::TopWindow> {
  public:
   CustomizeDlg();
 };

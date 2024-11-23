@@ -1,7 +1,7 @@
 #include "customize.h"
 
-#include "global.h"
 #include "board.h"
+#include "global.h"
 
 CustomizeDlg::CustomizeDlg() {
   CtrlLayout(*this);

@@ -13,7 +13,8 @@ void Board::Menu(Upp::Bar& bar) {
 void Board::FileMenu(Upp::Bar& bar) {
   bar.Add("About", [] {
     Upp::PromptOK(
-        "[4 MineSweeper v0.1.0]&Author: grch12&Made with [^https://ultimatepp.org^ U`+`+]. "
+        "[4 MineSweeper v0.1.0]&Author: grch12&Made with "
+        "[^https://ultimatepp.org^ U`+`+]. "
         "See LICENSE for details");
   });
   bar.Add("Exit", [&] { Close(); });
