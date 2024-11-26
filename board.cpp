@@ -2,7 +2,6 @@
 
 #include <cstdlib>
 #include <ctime>
-#include <utility>
 
 #include "customize.h"
 
@@ -38,28 +37,25 @@ void Board::GameMenu(Upp::Bar& bar) {
 }
 
 /**
- * Creates a new game board of the given size with the given number
- * of bombs.
+ * Constructs a new Board with the specified width, height, and bomb count.
  *
- * The board is created with a title of "MineSweeper" and a menu
- * with options for a new game and to exit the application.
+ * Creates a top-level window with a menu bar and a status bar.
  *
- * The board is then initialized by setting the size of the window
- * and creating an array of cells. The cells are initialized to
- * false, false, false, and 0, which means that they are not uncovered,
- * are not bombs, are not marked, and have 0 surrounding bombs.
+ * Sets the window's size to fit the specified width and height, with a little
+ * bit of extra room for the frame.
  *
- * The given number of bombs is then randomly distributed across the
- * board by setting the isBomb member of the appropriate cells to true.
+ * Initializes an array of width * height cells, with all cells initially
+ * uncovered and not marked.
  *
- * Finally, the number of safe cells is calculated by subtracting the
- * number of bombs from the total number of cells on the board.
+ * Randomly selects BOMB_COUNT cells to be bombs.
  */
 Board::Board(int w, int h, int b) : width(w), height(h), BOMB_COUNT(b) {
   Title(Upp::t_("MineSweeper"));
 
   AddFrame(appMenu);
   appMenu.Set(THISBACK(Menu));
+
+  safeCells = width * height - BOMB_COUNT;
 
   AddFrame(sb);
   sb = FormatStatusString();
@@ -82,8 +78,6 @@ Board::Board(int w, int h, int b) : width(w), height(h), BOMB_COUNT(b) {
     } while (cells[x][y].isBomb);
     cells[x][y].isBomb = true;
   }
-
-  safeCells = width * height - BOMB_COUNT;
 }
 
 Board::~Board() {
@@ -256,6 +250,6 @@ void Board::MarkCell(int x, int y) {
 }
 
 Upp::String Board::FormatStatusString() {
-  return Upp::Format(Upp::t_("%d bombs, %d marked, %d safe cells remaining"), BOMB_COUNT,
-                     markedCells, safeCells);
+  return Upp::Format(Upp::t_("%d bombs, %d marked, %d safe cells remaining"),
+                     BOMB_COUNT, markedCells, safeCells);
 }
