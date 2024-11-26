@@ -66,7 +66,7 @@ Board::Board(int w, int h, int b) : width(w), height(h), BOMB_COUNT(b) {
 
   cells = new Cell*[width];
   for (int i = 0; i < width; i++) {
-    cells[i] = new Cell[height]{false, false, false, 0};
+    cells[i] = new Cell[height]{{false, false, false, 0}};
   }
 
   std::srand(std::time(0));
