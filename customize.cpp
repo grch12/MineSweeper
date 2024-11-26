@@ -11,7 +11,7 @@ CustomizeDlg::CustomizeDlg() {
   inputWidth <<= w;
   inputHeight <<= h;
   inputBombs <<= b;
-  okBtn << [&] {
+  okBtn.Ok() << [&] {
     if (inputWidth <= 0 || inputHeight <= 0 || inputBombs <= 0) return;
     w = (int)inputWidth;
     h = (int)inputHeight;
@@ -21,5 +21,5 @@ CustomizeDlg::CustomizeDlg() {
     board = new Board(w, h, b);
     board->OpenMain();
   };
-  cancelBtn << [&] { Close(); };
+  cancelBtn.Cancel() << [&] { Close(); };
 }
