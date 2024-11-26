@@ -5,6 +5,8 @@
 
 #include "customize.h"
 
+#include "utils.h"
+
 #define TFILE <MineSweeper/app.t>
 #include <Core/t.h>
 
@@ -18,6 +20,8 @@ void Board::FileMenu(Upp::Bar& bar) {
     Upp::PromptOK(
         "[4 MineSweeper v0.2.0]&Author: grch12&GitHub repo: "
         "[^https://github.com/grch12/MineSweeper^ grch12/MineSweeper]&"
+        "Icon: [^https://openclipart.org/detail/20846^ "
+        "cartoon sea mine by rg1024]&"
         "Made with [^https://www.ultimatepp.org^ U`+`+]. "
         "See LICENSE for details");
   });
@@ -25,16 +29,16 @@ void Board::FileMenu(Upp::Bar& bar) {
 };
 
 void Board::GameMenu(Upp::Bar& bar) {
-  bar.Add(Upp::t_("New Game"), [] {
-    board->Close();
-    board = new Board(w, h, b);
-    board->OpenMain();
-  });
+  bar.Add(Upp::t_("New Game"), [] { NewGame(); });
   bar.Add(Upp::t_("Customize"), [] {
     CustomizeDlg dlg;
     dlg.Run();
   });
 }
+
+#define IMAGECLASS IconImg
+#define IMAGEFILE <MineSweeper/icon.iml>
+#include <Draw/iml.h>
 
 /**
  * Constructs a new Board with the specified width, height, and bomb count.
@@ -51,6 +55,7 @@ void Board::GameMenu(Upp::Bar& bar) {
  */
 Board::Board(int w, int h, int b) : width(w), height(h), BOMB_COUNT(b) {
   Title(Upp::t_("MineSweeper"));
+  Icon(IconImg::Icon());
 
   AddFrame(appMenu);
   appMenu.Set(THISBACK(Menu));

@@ -3,6 +3,8 @@
 #include "board.h"
 #include "global.h"
 
+#include "utils.h"
+
 #define TFILE <MineSweeper/app.t>
 #include <Core/t.h>
 
@@ -17,9 +19,7 @@ CustomizeDlg::CustomizeDlg() {
     h = (int)inputHeight;
     b = (int)inputBombs;
     Close();
-    board->Close();
-    board = new Board(w, h, b);
-    board->OpenMain();
+    NewGame();
   };
   cancelBtn.Cancel() << [&] { Close(); };
 }

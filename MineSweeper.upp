@@ -10,6 +10,10 @@ file
 	app.t,
 	board.cpp,
 	customize.cpp,
+	icon.iml,
+	minesweeper.rc,
+	utils.cpp,
+	utils.h,
 	main.cpp;
 
 mainconfig
