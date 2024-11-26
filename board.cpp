@@ -2,31 +2,36 @@
 
 #include <cstdlib>
 #include <ctime>
+#include <utility>
 
 #include "customize.h"
 
+#define TFILE <MineSweeper/app.t>
+#include <Core/t.h>
+
 void Board::Menu(Upp::Bar& bar) {
-  bar.Add("File", THISBACK(FileMenu));
-  bar.Add("Game", THISBACK(GameMenu));
+  bar.Add(Upp::t_("File"), THISBACK(FileMenu));
+  bar.Add(Upp::t_("Game"), THISBACK(GameMenu));
 }
 
 void Board::FileMenu(Upp::Bar& bar) {
-  bar.Add("About", [] {
+  bar.Add(Upp::t_("About"), [] {
     Upp::PromptOK(
-        "[4 MineSweeper v0.1.0]&Author: grch12&Made with "
-        "[^https://ultimatepp.org^ U`+`+]. "
+        "[4 MineSweeper v0.2.0]&Author: grch12&GitHub repo: "
+        "[^https://github.com/grch12/MineSweeper^ grch12/MineSweeper]&"
+        "Made with [^https://www.ultimatepp.org^ U`+`+]. "
         "See LICENSE for details");
   });
-  bar.Add("Exit", [&] { Close(); });
+  bar.Add(Upp::t_("Exit"), [&] { Close(); });
 };
 
 void Board::GameMenu(Upp::Bar& bar) {
-  bar.Add("New Game", [] {
+  bar.Add(Upp::t_("New Game"), [] {
     board->Close();
     board = new Board(w, h, b);
     board->OpenMain();
   });
-  bar.Add("Customize", [] {
+  bar.Add(Upp::t_("Customize"), [] {
     CustomizeDlg dlg;
     dlg.Run();
   });
@@ -51,10 +56,13 @@ void Board::GameMenu(Upp::Bar& bar) {
  * number of bombs from the total number of cells on the board.
  */
 Board::Board(int w, int h, int b) : width(w), height(h), BOMB_COUNT(b) {
-  Title("MineSweeper");
+  Title(Upp::t_("MineSweeper"));
 
   AddFrame(appMenu);
   appMenu.Set(THISBACK(Menu));
+
+  AddFrame(sb);
+  sb = FormatStatusString();
 
   Upp::Rect r = GetRect();
   r.SetSize(AddFrameSize(CELL_SIZE * width, CELL_SIZE * height));
@@ -98,13 +106,18 @@ void Board::LeftDown(Upp::Point p, Upp::dword flags) {
   if (gameOver) return;
   p /= CELL_SIZE;
   UncoverCell(p.x, p.y);
-  Refresh();
+  Update();
 }
 
 void Board::RightDown(Upp::Point p, Upp::dword flags) {
   if (gameOver) return;
   p /= CELL_SIZE;
   MarkCell(p.x, p.y);
+  Update();
+}
+
+void Board::Update() {
+  sb = FormatStatusString();
   Refresh();
 }
 
@@ -201,7 +214,7 @@ void Board::UncoverCell(int x, int y) {
   cells[x][y].uncovered = true;
   if (cells[x][y].isBomb) {
     gameOver = true;
-    Upp::PromptOK("Game Over");
+    Upp::PromptOK(Upp::t_("Game Over"));
   } else {
     safeCells--;
     CountSurroundingBombs(x, y);
@@ -217,7 +230,7 @@ void Board::UncoverCell(int x, int y) {
     }
     if (safeCells == 0 && !gameOver) {
       gameOver = true;
-      Upp::PromptOK("You Win!");
+      Upp::PromptOK(Upp::t_("You Win!"));
     }
   }
 }
@@ -236,4 +249,13 @@ void Board::CountSurroundingBombs(int x, int y) {
 void Board::MarkCell(int x, int y) {
   if (cells[x][y].uncovered) return;
   cells[x][y].marked = !cells[x][y].marked;
+  if (cells[x][y].marked)
+    markedCells++;
+  else
+    markedCells--;
+}
+
+Upp::String Board::FormatStatusString() {
+  return Upp::Format(Upp::t_("%d bombs, %d marked, %d safe cells remaining"), BOMB_COUNT,
+                     markedCells, safeCells);
 }

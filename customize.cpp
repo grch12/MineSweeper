@@ -3,6 +3,9 @@
 #include "board.h"
 #include "global.h"
 
+#define TFILE <MineSweeper/app.t>
+#include <Core/t.h>
+
 CustomizeDlg::CustomizeDlg() {
   CtrlLayout(*this);
   inputWidth <<= w;

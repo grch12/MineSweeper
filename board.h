@@ -19,6 +19,8 @@ class Board : public Upp::TopWindow {
   void FileMenu(Upp::Bar& bar);
   void GameMenu(Upp::Bar& bar);
 
+  Upp::StatusBar sb;
+
   int width, height;
   int BOMB_COUNT;
   static constexpr int CELL_SIZE = 30;
@@ -39,6 +41,10 @@ class Board : public Upp::TopWindow {
  private:
   Cell** cells;
 
+  int markedCells = 0;
+
+  void Update();
+
   void DrawGrid(Upp::Draw& w);
   void DrawCells(Upp::Draw& w);
 
@@ -46,6 +52,8 @@ class Board : public Upp::TopWindow {
   void CountSurroundingBombs(int x, int y);
 
   void MarkCell(int x, int y);
+
+  Upp::String FormatStatusString();
 };
 
 #endif
