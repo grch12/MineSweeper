@@ -16,6 +16,18 @@ zhCN("退出")
 T_("New Game")
 zhCN("新游戏")
 
+T_("Difficulty")
+zhCN("难度")
+
+T_("Beginner")
+zhCN("初级")
+
+T_("Intermediate")
+zhCN("中级")
+
+T_("Expert")
+zhCN("高级")
+
 T_("Customize")
 zhCN("自定义")
 

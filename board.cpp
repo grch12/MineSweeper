@@ -4,7 +4,6 @@
 #include <ctime>
 
 #include "customize.h"
-
 #include "utils.h"
 
 #define TFILE <MineSweeper/app.t>
@@ -21,18 +20,54 @@ void Board::FileMenu(Upp::Bar& bar) {
         "[4 MineSweeper v0.2.0]&Author: grch12&GitHub repo: "
         "[^https://github.com/grch12/MineSweeper^ grch12/MineSweeper]&"
         "Icon: [^https://openclipart.org/detail/20846^ "
-        "cartoon sea mine by rg1024]&"
+        "cartoon sea mine by rg1024]&Flag Image: "
+        "[^https://www.svgrepo.com/svg/251968/flag-maps-and-flags^ "
+        "Flag Maps And Flags SVG Vector] from SVG Repo&"
         "Made with [^https://www.ultimatepp.org^ U`+`+]. "
         "See LICENSE for details");
   });
   bar.Add(Upp::t_("Exit"), [&] { Close(); });
 };
 
+/**
+ * Configures the game menu options in the application's menu bar.
+ *
+ * Adds a "New Game" option to start a new game immediately.
+ *
+ * Adds a "Difficulty" submenu with predefined difficulty levels:
+ * "Beginner", "Intermediate", "Expert", each setting the
+ * width, height, and bomb count for the game, and starting a new game.
+ *
+ * Adds a "Customize" option that opens a dialog for custom game settings.
+ *
+ * @param bar The Upp::Bar object that represents the menu bar to which
+ * the game menu options are added.
+ */
 void Board::GameMenu(Upp::Bar& bar) {
   bar.Add(Upp::t_("New Game"), [] { NewGame(); });
-  bar.Add(Upp::t_("Customize"), [] {
-    CustomizeDlg dlg;
-    dlg.Run();
+  bar.Sub(Upp::t_("Difficulty"), [](Upp::Bar& bar) {
+    bar.Add(Upp::t_("Beginner"), [] {
+      w = 9;
+      h = 9;
+      b = 10;
+      NewGame();
+    });
+    bar.Add(Upp::t_("Intermediate"), [] {
+      w = 16;
+      h = 16;
+      b = 40;
+      NewGame();
+    });
+    bar.Add(Upp::t_("Expert"), [] {
+      w = 30;
+      h = 16;
+      b = 99;
+      NewGame();
+    });
+    bar.Add(Upp::t_("Customize"), [] {
+      CustomizeDlg dlg;
+      dlg.Run();
+    });
   });
 }
 
@@ -157,8 +192,7 @@ void Board::DrawCells(Upp::Draw& w) {
       } else {
         cellColor = Upp::SWhite();
       }
-      w.DrawRect(i * CELL_SIZE, j * CELL_SIZE, (i + 1) * CELL_SIZE,
-                 (j + 1) * CELL_SIZE, cellColor);
+      w.DrawRect(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE, cellColor);
 
       if (!cell.isBomb) {
         if (cell.surroundingBombs > 0) {
@@ -182,10 +216,8 @@ void Board::DrawCells(Upp::Draw& w) {
       }
 
       if (cell.marked) {
-        w.DrawLine(i * CELL_SIZE, j * CELL_SIZE, (i + 1) * CELL_SIZE,
-                   (j + 1) * CELL_SIZE, 2, Upp::SBlack());
-        w.DrawLine((i + 1) * CELL_SIZE, j * CELL_SIZE, i * CELL_SIZE,
-                   (j + 1) * CELL_SIZE, 2, Upp::SBlack());
+        w.DrawImage(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE,
+                    IconImg::Flag());
       }
     }
   }
