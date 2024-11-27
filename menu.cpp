@@ -10,7 +10,7 @@ void Board::Menu(Upp::Bar& bar) {
 void Board::FileMenu(Upp::Bar& bar) {
   bar.Add(Upp::t_("About"), [] {
     Upp::PromptOK(
-        "[4 MineSweeper v0.2.0]&Author: grch12&GitHub repo: "
+        "[4 MineSweeper v0.3.0]&Author: grch12&GitHub repo: "
         "[^https://github.com/grch12/MineSweeper^ grch12/MineSweeper]&"
         "Icon: [^https://openclipart.org/detail/20846^ "
         "cartoon sea mine] by rg1024&Flag Image: "
