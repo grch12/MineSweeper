@@ -9,4 +9,6 @@ extern Board* board;
 
 extern int w, h, b;
 
+extern Upp::Point explodePoint;
+
 #endif

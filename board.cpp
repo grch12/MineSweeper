@@ -9,68 +9,6 @@
 #define TFILE <MineSweeper/app.t>
 #include <Core/t.h>
 
-void Board::Menu(Upp::Bar& bar) {
-  bar.Add(Upp::t_("File"), THISBACK(FileMenu));
-  bar.Add(Upp::t_("Game"), THISBACK(GameMenu));
-}
-
-void Board::FileMenu(Upp::Bar& bar) {
-  bar.Add(Upp::t_("About"), [] {
-    Upp::PromptOK(
-        "[4 MineSweeper v0.2.0]&Author: grch12&GitHub repo: "
-        "[^https://github.com/grch12/MineSweeper^ grch12/MineSweeper]&"
-        "Icon: [^https://openclipart.org/detail/20846^ "
-        "cartoon sea mine by rg1024]&Flag Image: "
-        "[^https://www.svgrepo.com/svg/251968/flag-maps-and-flags^ "
-        "Flag Maps And Flags SVG Vector] from SVG Repo&"
-        "Made with [^https://www.ultimatepp.org^ U`+`+]. "
-        "See LICENSE for details");
-  });
-  bar.Add(Upp::t_("Exit"), [&] { Close(); });
-};
-
-/**
- * Configures the game menu options in the application's menu bar.
- *
- * Adds a "New Game" option to start a new game immediately.
- *
- * Adds a "Difficulty" submenu with predefined difficulty levels:
- * "Beginner", "Intermediate", "Expert", each setting the
- * width, height, and bomb count for the game, and starting a new game.
- *
- * Adds a "Customize" option that opens a dialog for custom game settings.
- *
- * @param bar The Upp::Bar object that represents the menu bar to which
- * the game menu options are added.
- */
-void Board::GameMenu(Upp::Bar& bar) {
-  bar.Add(Upp::t_("New Game"), [] { NewGame(); });
-  bar.Sub(Upp::t_("Difficulty"), [](Upp::Bar& bar) {
-    bar.Add(Upp::t_("Beginner"), [] {
-      w = 9;
-      h = 9;
-      b = 10;
-      NewGame();
-    });
-    bar.Add(Upp::t_("Intermediate"), [] {
-      w = 16;
-      h = 16;
-      b = 40;
-      NewGame();
-    });
-    bar.Add(Upp::t_("Expert"), [] {
-      w = 30;
-      h = 16;
-      b = 99;
-      NewGame();
-    });
-    bar.Add(Upp::t_("Customize"), [] {
-      CustomizeDlg dlg;
-      dlg.Run();
-    });
-  });
-}
-
 #define IMAGECLASS IconImg
 #define IMAGEFILE <MineSweeper/icon.iml>
 #include <Draw/iml.h>
@@ -139,8 +77,23 @@ void Board::Paint(Upp::Draw& w) {
 void Board::LeftDown(Upp::Point p, Upp::dword flags) {
   if (gameOver) return;
   p /= CELL_SIZE;
-  UncoverCell(p.x, p.y);
+  int result = UncoverCell(p.x, p.y);
   Update();
+  switch (result) {
+    case -1: {
+      EndGame();
+      Upp::PromptOK(Upp::t_("You Win!"));
+      break;
+    }
+    case -2: {
+      EndGame();
+      Upp::PromptOK(Upp::t_("Game Over"));
+      break;
+    }
+    default: {
+      break;
+    }
+  }
 }
 
 void Board::RightDown(Upp::Point p, Upp::dword flags) {
@@ -152,6 +105,12 @@ void Board::RightDown(Upp::Point p, Upp::dword flags) {
 
 void Board::Update() {
   sb = FormatStatusString();
+  Refresh();
+}
+
+void Board::EndGame() {
+  gameOver = true;
+  UncoverAll();
   Refresh();
 }
 
@@ -167,18 +126,17 @@ void Board::DrawGrid(Upp::Draw& w) {
 }
 
 /**
- * Draws all cells on the board.
+ * Draws all cells in the grid, including uncovered cells, marked cells, and
+ * cells containing bombs.
  *
- * If the cell is not uncovered, fills the cell with a light gray color.
+ * The color of each cell is determined by its state: gray for uncovered cells,
+ * red for the cell where the user lost, and white for all other cells.
  *
- * If the cell is a bomb, fills the cell with a light red color.
+ * If the cell is a bomb and has been uncovered, draws a bomb icon in the cell.
  *
- * If the cell is not a bomb and has surrounding bombs, draws the number of
- * surrounding bombs in the center of the cell. The color of the text is
- * determined by the number of surrounding bombs: blue if there is 1, green if
- * there are 2, red if there are 3, and black if there are more.
- *
- * If the cell is marked, draws two black lines crossing the center of the cell.
+ * If the cell is marked, draws a flag icon in the cell. If the user has lost
+ * and the cell is not a bomb, draws two diagonal lines through the cell to
+ * indicate that the mark was incorrect.
  */
 void Board::DrawCells(Upp::Draw& w) {
   for (int i = 0; i < width; i++) {
@@ -187,7 +145,7 @@ void Board::DrawCells(Upp::Draw& w) {
       Upp::Color cellColor;
       if (!cell.uncovered) {
         cellColor = Upp::SLtGray();
-      } else if (cell.isBomb) {
+      } else if (explodePoint.x == i && explodePoint.y == j) {
         cellColor = Upp::LtRed();
       } else {
         cellColor = Upp::SWhite();
@@ -215,9 +173,20 @@ void Board::DrawCells(Upp::Draw& w) {
         }
       }
 
+      if (cell.isBomb && cell.uncovered) {
+        w.DrawImage(i * CELL_SIZE + 3, j * CELL_SIZE + 3, CELL_SIZE - 6,
+                    CELL_SIZE - 6, IconImg::Icon());
+      }
+
       if (cell.marked) {
         w.DrawImage(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE,
                     IconImg::Flag());
+        if (gameOver && !cell.isBomb) {
+          w.DrawLine(i * CELL_SIZE, j * CELL_SIZE, (i + 1) * CELL_SIZE,
+                     (j + 1) * CELL_SIZE, 2, Upp::SBlack());
+          w.DrawLine((i + 1) * CELL_SIZE, j * CELL_SIZE, i * CELL_SIZE,
+                     (j + 1) * CELL_SIZE, 2, Upp::SBlack());
+        }
       }
     }
   }
@@ -226,26 +195,24 @@ void Board::DrawCells(Upp::Draw& w) {
 /**
  * Uncovers a cell at the given position.
  *
- * If the cell is marked, or is already uncovered, does nothing.
+ * If the cell is marked or already uncovered, does nothing.
  *
- * If the cell is a bomb, ends the game and displays a "Game Over" message.
+ * If the cell is a bomb, sets the game over flag and returns -2.
  *
- * If the cell is not a bomb, decrements the number of safe cells and counts
- * the number of surrounding bombs.
+ * If the cell is not a bomb, decrements the safe cell count and returns 0.
  *
- * If the number of surrounding bombs is 0, recursively uncovers all
- * surrounding cells.
+ * If the uncovered cell has no surrounding bombs, uncovers all its neighbors
+ * recursively.
  *
- * If the number of safe cells reaches 0, ends the game and displays a
- * "You Win!" message.
+ * If the safe cell count reaches 0, returns -1 to indicate a win.
  */
-void Board::UncoverCell(int x, int y) {
-  if (cells[x][y].marked) return;
-  if (cells[x][y].uncovered) return;
+int Board::UncoverCell(int x, int y) {
+  if (cells[x][y].marked) return 0;
+  if (cells[x][y].uncovered) return 0;
   cells[x][y].uncovered = true;
   if (cells[x][y].isBomb) {
-    gameOver = true;
-    Upp::PromptOK(Upp::t_("Game Over"));
+    if (!gameOver) explodePoint = {x, y};
+    return -2;  // Lost
   } else {
     safeCells--;
     CountSurroundingBombs(x, y);
@@ -254,14 +221,21 @@ void Board::UncoverCell(int x, int y) {
         for (int j = -1; j <= 1; j++) {
           if (x + i < 0 || x + i >= width || y + j < 0 || y + j >= height)
             continue;
-          if (cells[x + i][y + j].uncovered) continue;
           UncoverCell(x + i, y + j);
         }
       }
     }
-    if (safeCells == 0 && !gameOver) {
-      gameOver = true;
-      Upp::PromptOK(Upp::t_("You Win!"));
+    if (safeCells == 0) {
+      return -1;  // Win
+    }
+  }
+  return 0;
+}
+
+void Board::UncoverAll() {
+  for (int i = 0; i < width; i++) {
+    for (int j = 0; j < height; j++) {
+      UncoverCell(i, j);
     }
   }
 }

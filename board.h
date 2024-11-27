@@ -45,10 +45,13 @@ class Board : public Upp::TopWindow {
 
   void Update();
 
+  void EndGame();
+
   void DrawGrid(Upp::Draw& w);
   void DrawCells(Upp::Draw& w);
 
-  void UncoverCell(int x, int y);
+  int UncoverCell(int x, int y);
+  void UncoverAll();
   void CountSurroundingBombs(int x, int y);
 
   void MarkCell(int x, int y);

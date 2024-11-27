@@ -8,6 +8,7 @@ file
 	customize.h,
 	global.h,
 	app.t,
+	menu.cpp,
 	board.cpp,
 	customize.cpp,
 	icon.iml,
