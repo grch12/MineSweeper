@@ -212,7 +212,7 @@ int Board::UncoverCell(int x, int y) {
   cells[x][y].uncovered = true;
   if (cells[x][y].isMine) {
     if (!gameOver) explodePoint = {x, y};
-    return -2;  // Lost
+    return -2;  // Lose
   } else {
     safeCells--;
     CountSurroundingMines(x, y);
