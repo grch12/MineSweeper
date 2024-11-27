@@ -7,7 +7,7 @@ class Board;
 
 extern Board* board;
 
-extern int w, h, b;
+extern int w, h, m;
 
 extern Upp::Point explodePoint;
 

@@ -29,7 +29,7 @@ void Board::FileMenu(Upp::Bar& bar) {
  *
  * Adds a "Difficulty" submenu with predefined difficulty levels:
  * "Beginner", "Intermediate", "Expert", each setting the
- * width, height, and bomb count for the game, and starting a new game.
+ * width, height, and mine count for the game, and starting a new game.
  *
  * Adds a "Customize" option that opens a dialog for custom game settings.
  *
@@ -42,19 +42,19 @@ void Board::GameMenu(Upp::Bar& bar) {
     bar.Add(Upp::t_("Beginner"), [] {
       w = 9;
       h = 9;
-      b = 10;
+      m = 10;
       NewGame();
     });
     bar.Add(Upp::t_("Intermediate"), [] {
       w = 16;
       h = 16;
-      b = 40;
+      m = 40;
       NewGame();
     });
     bar.Add(Upp::t_("Expert"), [] {
       w = 30;
       h = 16;
-      b = 99;
+      m = 99;
       NewGame();
     });
     bar.Add(Upp::t_("Customize"), [] {

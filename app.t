@@ -37,7 +37,7 @@ zhCN("游戏结束")
 T_("You Win!")
 zhCN("你赢了!")
 
-T_("%d bombs, %d marked, %d safe cells remaining")
+T_("%d mines, %d marked, %d safe cells remaining")
 zhCN("%d 个地雷，%d 个已标记，还剩 %d 个安全的格子")
 
 T_("Width")
@@ -46,5 +46,5 @@ zhCN("宽度")
 T_("Height")
 zhCN("高度")
 
-T_("Bombs")
+T_("Mines")
 zhCN("地雷数量")

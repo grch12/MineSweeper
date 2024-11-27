@@ -5,9 +5,9 @@
 
 struct Cell {
   bool uncovered;
-  bool isBomb;
+  bool isMine;
   bool marked;
-  int surroundingBombs;
+  int surroundingMines;
 };
 
 class Board : public Upp::TopWindow {
@@ -22,14 +22,14 @@ class Board : public Upp::TopWindow {
   Upp::StatusBar sb;
 
   int width, height;
-  int BOMB_COUNT;
+  int MINE_COUNT;
   static constexpr int CELL_SIZE = 30;
 
   int safeCells = 0;
 
   bool gameOver = false;
 
-  Board(int w, int h, int b);
+  Board(int w, int h, int m);
   ~Board();
 
   virtual void Close() override;
@@ -52,7 +52,7 @@ class Board : public Upp::TopWindow {
 
   int UncoverCell(int x, int y);
   void UncoverAll();
-  void CountSurroundingBombs(int x, int y);
+  void CountSurroundingMines(int x, int y);
 
   void MarkCell(int x, int y);
 

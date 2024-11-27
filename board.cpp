@@ -14,7 +14,7 @@
 #include <Draw/iml.h>
 
 /**
- * Constructs a new Board with the specified width, height, and bomb count.
+ * Constructs a new Board with the specified width, height, and mine count.
  *
  * Creates a top-level window with a menu bar and a status bar.
  *
@@ -24,16 +24,16 @@
  * Initializes an array of width * height cells, with all cells initially
  * uncovered and not marked.
  *
- * Randomly selects BOMB_COUNT cells to be bombs.
+ * Randomly selects MINE_COUNT cells to be mines.
  */
-Board::Board(int w, int h, int b) : width(w), height(h), BOMB_COUNT(b) {
+Board::Board(int w, int h, int m) : width(w), height(h), MINE_COUNT(m) {
   Title(Upp::t_("MineSweeper"));
   Icon(IconImg::Icon());
 
   AddFrame(appMenu);
   appMenu.Set(THISBACK(Menu));
 
-  safeCells = width * height - BOMB_COUNT;
+  safeCells = width * height - MINE_COUNT;
 
   AddFrame(sb);
   sb = FormatStatusString();
@@ -48,13 +48,13 @@ Board::Board(int w, int h, int b) : width(w), height(h), BOMB_COUNT(b) {
   }
 
   std::srand(std::time(0));
-  for (int i = 0; i < BOMB_COUNT; i++) {
+  for (int i = 0; i < MINE_COUNT; i++) {
     int x, y;
     do {
       x = std::rand() % width;
       y = std::rand() % height;
-    } while (cells[x][y].isBomb);
-    cells[x][y].isBomb = true;
+    } while (cells[x][y].isMine);
+    cells[x][y].isMine = true;
   }
 }
 
@@ -127,15 +127,15 @@ void Board::DrawGrid(Upp::Draw& w) {
 
 /**
  * Draws all cells in the grid, including uncovered cells, marked cells, and
- * cells containing bombs.
+ * cells containing mines.
  *
  * The color of each cell is determined by its state: gray for uncovered cells,
  * red for the cell where the user lost, and white for all other cells.
  *
- * If the cell is a bomb and has been uncovered, draws a bomb icon in the cell.
+ * If the cell is a mine and has been uncovered, draws a mine icon in the cell.
  *
  * If the cell is marked, draws a flag icon in the cell. If the user has lost
- * and the cell is not a bomb, draws two diagonal lines through the cell to
+ * and the cell is not a mine, draws two diagonal lines through the cell to
  * indicate that the mark was incorrect.
  */
 void Board::DrawCells(Upp::Draw& w) {
@@ -152,28 +152,28 @@ void Board::DrawCells(Upp::Draw& w) {
       }
       w.DrawRect(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE, cellColor);
 
-      if (!cell.isBomb) {
-        if (cell.surroundingBombs > 0) {
+      if (!cell.isMine) {
+        if (cell.surroundingMines > 0) {
           Upp::Color textColor;
-          if (cell.surroundingBombs == 1) {
+          if (cell.surroundingMines == 1) {
             textColor = Upp::Blue();
-          } else if (cell.surroundingBombs == 2) {
+          } else if (cell.surroundingMines == 2) {
             textColor = Upp::Green();
-          } else if (cell.surroundingBombs == 3) {
+          } else if (cell.surroundingMines == 3) {
             textColor = Upp::Red();
           } else {
             textColor = Upp::SBlack();
           }
           Upp::Size textSize = Upp::GetTextSize(
-              Upp::AsString(cell.surroundingBombs), Upp::StdFontZ(16).Bold());
+              Upp::AsString(cell.surroundingMines), Upp::StdFontZ(16).Bold());
           w.DrawText(i * CELL_SIZE + (CELL_SIZE - textSize.cx) / 2,
                      j * CELL_SIZE + (CELL_SIZE - textSize.cy) / 2,
-                     Upp::AsString(cell.surroundingBombs),
+                     Upp::AsString(cell.surroundingMines),
                      Upp::StdFontZ(16).Bold(), textColor);
         }
       }
 
-      if (cell.isBomb && cell.uncovered) {
+      if (cell.isMine && cell.uncovered) {
         w.DrawImage(i * CELL_SIZE + 3, j * CELL_SIZE + 3, CELL_SIZE - 6,
                     CELL_SIZE - 6, IconImg::Icon());
       }
@@ -181,7 +181,7 @@ void Board::DrawCells(Upp::Draw& w) {
       if (cell.marked) {
         w.DrawImage(i * CELL_SIZE, j * CELL_SIZE, CELL_SIZE, CELL_SIZE,
                     IconImg::Flag());
-        if (gameOver && !cell.isBomb) {
+        if (gameOver && !cell.isMine) {
           w.DrawLine(i * CELL_SIZE, j * CELL_SIZE, (i + 1) * CELL_SIZE,
                      (j + 1) * CELL_SIZE, 2, Upp::SBlack());
           w.DrawLine((i + 1) * CELL_SIZE, j * CELL_SIZE, i * CELL_SIZE,
@@ -197,11 +197,11 @@ void Board::DrawCells(Upp::Draw& w) {
  *
  * If the cell is marked or already uncovered, does nothing.
  *
- * If the cell is a bomb, sets the game over flag and returns -2.
+ * If the cell is a mine, sets the game over flag and returns -2.
  *
- * If the cell is not a bomb, decrements the safe cell count and returns 0.
+ * If the cell is not a mine, decrements the safe cell count and returns 0.
  *
- * If the uncovered cell has no surrounding bombs, uncovers all its neighbors
+ * If the uncovered cell has no surrounding mines, uncovers all its neighbors
  * recursively.
  *
  * If the safe cell count reaches 0, returns -1 to indicate a win.
@@ -210,13 +210,13 @@ int Board::UncoverCell(int x, int y) {
   if (cells[x][y].marked) return 0;
   if (cells[x][y].uncovered) return 0;
   cells[x][y].uncovered = true;
-  if (cells[x][y].isBomb) {
+  if (cells[x][y].isMine) {
     if (!gameOver) explodePoint = {x, y};
     return -2;  // Lost
   } else {
     safeCells--;
-    CountSurroundingBombs(x, y);
-    if (cells[x][y].surroundingBombs == 0) {
+    CountSurroundingMines(x, y);
+    if (cells[x][y].surroundingMines == 0) {
       for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
           if (x + i < 0 || x + i >= width || y + j < 0 || y + j >= height)
@@ -240,15 +240,15 @@ void Board::UncoverAll() {
   }
 }
 
-void Board::CountSurroundingBombs(int x, int y) {
+void Board::CountSurroundingMines(int x, int y) {
   int count = 0;
   for (int i = -1; i <= 1; i++) {
     for (int j = -1; j <= 1; j++) {
       if (x + i < 0 || x + i >= width || y + j < 0 || y + j >= height) continue;
-      if (cells[x + i][y + j].isBomb) count++;
+      if (cells[x + i][y + j].isMine) count++;
     }
   }
-  cells[x][y].surroundingBombs = count;
+  cells[x][y].surroundingMines = count;
 }
 
 void Board::MarkCell(int x, int y) {
@@ -261,6 +261,6 @@ void Board::MarkCell(int x, int y) {
 }
 
 Upp::String Board::FormatStatusString() {
-  return Upp::Format(Upp::t_("%d bombs, %d marked, %d safe cells remaining"),
-                     BOMB_COUNT, markedCells, safeCells);
+  return Upp::Format(Upp::t_("%d mines, %d marked, %d safe cells remaining"),
+                     MINE_COUNT, markedCells, safeCells);
 }

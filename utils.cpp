@@ -5,6 +5,6 @@
 void NewGame() {
   explodePoint = {-1, -1};
   board->Close();
-  board = new Board(w, h, b);
+  board = new Board(w, h, m);
   board->OpenMain();
 }
